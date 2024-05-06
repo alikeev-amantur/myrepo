@@ -60,7 +60,7 @@ class BeverageViewSet(viewsets.ModelViewSet):
 
     queryset = Beverage.objects.all()
     serializer_class = BeverageSerializer
-    filter_backends = [DjangoFilterBackend,SearchFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = BeverageFilter
     search_fields = ['name', 'category__name', 'establishment__name']
 

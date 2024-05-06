@@ -1,46 +1,53 @@
 import pytest
 from django.contrib.gis.geos import Point
+from rest_framework import status
 from rest_framework.test import APIClient
 
-from happyhours.factories import UserFactory
-from ..models import Establishment
+from apps.partner.models import Establishment
+from happyhours.factories import EstablishmentFactory, UserFactory
 
 
-@pytest.fixture
-def api_client():
-    return APIClient()
+@pytest.mark.django_db
+class TestEstablishmentAPI:
+    def setup_method(self):
+        self.client = APIClient()
+        self.user = UserFactory(role='partner')
+        self.client.force_authenticate(user=self.user)
+        self.establishment_data = {
+            "name": "Test Establishment",
+            'location': {
+                'type': 'Point',
+                'coordinates': [10, 20]
+            },
+            "description": "A new establishment",
+            "address": "1234 Test St."
+        }
 
+    def test_retrieve_establishment_with_location(self):
+        establishment = EstablishmentFactory(
+            owner=self.user,
+            location=Point(10.0, 20.0)
+        )
 
-@pytest.fixture
-def test_user():
-    return UserFactory()
+        # GET method
+        response = self.client.get(f'/api/v1/partner/establishment/{establishment.id}/')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['location']['coordinates'] == [10.0, 20.0]
 
+    def test_create_establishment_with_valid_location(self):
+        # POST method with valid data
+        response = self.client.post('/api/v1/partner/establishment/create/', data=self.establishment_data,
+                                    format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['location']['coordinates'] == [10.0, 20.0]
+        assert Establishment.objects.count() == 1
 
-@pytest.fixture
-def test_establishment(db, test_user):
-    return Establishment.objects.create(
-        name="Test Bar",
-        location=Point(34.052235, -118.243683),
-        owner=test_user
-    )
+    def test_create_establishment_with_invalid_location(self):
+        # Invalid location data
+        invalid_data = self.establishment_data.copy()
+        invalid_data['location'] = {"type": "Point", "coordinates": [190.0, 95.0]}
 
-
-# @pytest.mark.django_db
-# def test_establishment_serializer_create(api_client, test_user):
-#     api_client.force_authenticate(user=test_user)
-#     data = {
-#         "name": "New Bar",
-#         "location": {"type": "Point", "coordinates": [-118.243683, 34.052235]},
-#         "owner": test_user.id
-#     }
-#     response = api_client.post('/api/establishments/', data, format='json')
-#     assert response.status_code == 201
-#     assert response.data['location']['coordinates'] == [-118.243683, 34.052235]
-#
-#
-# @pytest.mark.django_db
-# def test_establishment_serializer_get(api_client, test_establishment):
-#     api_client.force_authenticate(user=test_establishment.owner)
-#     response = api_client.get(f'/api/establishments/{test_establishment.id}/')
-#     assert response.status_code == 200
-#     assert response.data['location']['coordinates'] == [34.052235, -118.243683]
+        response = self.client.post('/api/v1/partner/establishment/create/', data=invalid_data, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'location' in response.data
+        assert Establishment.objects.count() == 0

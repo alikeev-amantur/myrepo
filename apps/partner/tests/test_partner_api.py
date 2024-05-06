@@ -17,6 +17,10 @@ class TestEstablishmentAPI:
         data = {
             'name': 'New Establishment',
             'description': 'A new sample establishment',
+            'location': {
+                'type': 'Point',
+                'coordinates': [10, 20]
+            },
             'owner': user.id
         }
         response = self.client.post(url, data, format='json')

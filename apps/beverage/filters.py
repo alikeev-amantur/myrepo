@@ -1,5 +1,5 @@
 from django.utils import timezone
-from django_filters import rest_framework as filters
+
 
 from apps.beverage.models import Beverage
 
@@ -7,9 +7,6 @@ from django_filters import rest_framework as filters
 
 
 class BeverageFilter(filters.FilterSet):
-    # name = filters.CharFilter(field_name='name', lookup_expr='icontains')
-    # category = filters.CharFilter(field_name='category__name', lookup_expr='icontains')
-    # establishment = filters.CharFilter(field_name='establishment__name', lookup_expr='icontains')
     availability_status = filters.BooleanFilter(field_name='availability_status')
     in_happy_hour = filters.BooleanFilter(method='filter_happy_hour')
 
