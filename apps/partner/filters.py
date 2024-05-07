@@ -8,23 +8,24 @@ from ..beverage.models import Beverage
 
 
 class EstablishmentFilter(filters.FilterSet):
-    near_me = filters.NumberFilter(method='filter_distance')
-    happyhours_active = filters.BooleanFilter(method='filter_happyhours_active')
+    near_me = filters.NumberFilter(method="filter_distance")
+    happyhours_active = filters.BooleanFilter(method="filter_happyhours_active")
 
     class Meta:
         model = Establishment
         fields = []
 
     def filter_distance(self, queryset, name, value):
-        latitude = self.request.query_params.get('latitude', None)
-        longitude = self.request.query_params.get('longitude', None)
+        latitude = self.request.query_params.get("latitude", None)
+        longitude = self.request.query_params.get("longitude", None)
         if latitude and longitude and value:
             latitude = float(latitude)
             longitude = float(longitude)
             near_me = float(value)
             reference_location = Point(longitude, latitude, srid=4326)
-            queryset = queryset.annotate(distance=Distance('location', reference_location)).filter(
-                distance__lte=near_me)
+            queryset = queryset.annotate(
+                distance=Distance("location", reference_location)
+            ).filter(distance__lte=near_me)
         return queryset
 
     def filter_happyhours_active(self, queryset, name, value):
@@ -35,8 +36,8 @@ class EstablishmentFilter(filters.FilterSet):
 
 
 class MenuFilter(filters.FilterSet):
-    category = filters.CharFilter(field_name='category__name', lookup_expr='icontains')
+    category = filters.CharFilter(field_name="category__name", lookup_expr="icontains")
 
     class Meta:
         model = Beverage
-        fields = ['category']
+        fields = ["category"]

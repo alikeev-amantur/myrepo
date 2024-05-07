@@ -27,18 +27,20 @@ class BeverageSerializer(serializers.ModelSerializer):
             "description",
             "availability_status",
             "establishment",
-            "category"
+            "category",
         ]
 
     def to_representation(self, instance):
         """Modify the output of the GET method to show names instead of IDs."""
         ret = super().to_representation(instance)
-        ret['category'] = instance.category.name if instance.category else None
-        ret['establishment'] = instance.establishment.name if instance.establishment else None
+        ret["category"] = instance.category.name if instance.category else None
+        ret["establishment"] = (
+            instance.establishment.name if instance.establishment else None
+        )
         return ret
 
     def validate_establishment(self, value):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if value.owner != user:
             raise serializers.ValidationError("User does not own this establishment.")
         return value

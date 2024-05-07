@@ -1,4 +1,8 @@
-from drf_spectacular.utils import OpenApiExample, extend_schema_serializer, extend_schema
+from drf_spectacular.utils import (
+    OpenApiExample,
+    extend_schema_serializer,
+    extend_schema,
+)
 
 beverage_serializer_schema = extend_schema_serializer(
     examples=[
@@ -11,9 +15,9 @@ beverage_serializer_schema = extend_schema_serializer(
                 "description": "Refreshing carbonated soft drink.",
                 "availability_status": True,
                 "category": 1,
-                "establishment": 1
+                "establishment": 1,
             },
-            request_only=True
+            request_only=True,
         ),
         OpenApiExample(
             name="Beverage Retrieval Success",
@@ -25,9 +29,9 @@ beverage_serializer_schema = extend_schema_serializer(
                 "description": "Refreshing carbonated soft drink.",
                 "availability_status": True,
                 "category": "Soft Drinks",
-                "establishment": "Joe's Bar"
+                "establishment": "Joe's Bar",
             },
-            response_only=True
+            response_only=True,
         ),
         OpenApiExample(
             name="Beverage Update Success",
@@ -39,17 +43,16 @@ beverage_serializer_schema = extend_schema_serializer(
                 "description": "Extra refreshing carbonated soft drink.",
                 "availability_status": True,
                 "category": 1,
-                "establishment": 1
+                "establishment": 1,
             },
-            request_only=True
+            request_only=True,
         ),
         OpenApiExample(
             name="Beverage Creation Error",
             description="Error during the creation of a beverage due to invalid data",
-            value={
-                "price": ["Ensure this value is greater than or equal to 0.01."]
-            },
-            response_only=True, status_codes=['400'],
-        )
+            value={"price": ["Ensure this value is greater than or equal to 0.01."]},
+            response_only=True,
+            status_codes=["400"],
+        ),
     ]
 )

@@ -41,18 +41,16 @@ urlpatterns = [
                 "patch": "partial_update",
                 "delete": "destroy",
             }
-        ), name="user-detail",
+        ),
+        name="user-detail",
     ),
     path(
-        'password_forgot/', ClientPasswordForgotPageView.as_view(),
-        name='password-forgot-page'
+        "password_forgot/",
+        ClientPasswordForgotPageView.as_view(),
+        name="password-forgot-page",
     ),
+    path("password_reset/", ClientPasswordResetView.as_view(), name="password-reset"),
     path(
-        'password_reset/', ClientPasswordResetView.as_view(),
-        name='password-reset'
-    ),
-    path(
-        'password_change/', ClientPasswordChangeView.as_view(),
-        name='password-change'
+        "password_change/", ClientPasswordChangeView.as_view(), name="password-change"
     ),
 ]

@@ -8,7 +8,8 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveAPIView,
     UpdateAPIView,
-    DestroyAPIView, get_object_or_404,
+    DestroyAPIView,
+    get_object_or_404,
 )
 
 from rest_framework.permissions import IsAuthenticated
@@ -43,9 +44,9 @@ class EstablishmentListView(ListAPIView):
 
     serializer_class = EstablishmentSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = EstablishmentFilter
-    # search_fields = ['name', 'beverages__name']
+    search_fields = ["name", "beverages__name"]
 
     def get_queryset(self):
         user = self.request.user
@@ -112,6 +113,7 @@ class MenuView(viewsets.ReadOnlyModelViewSet):
     Provides a view of the menu for a specific establishment,
     accessible to all authenticated users.
     """
+
     serializer_class = BeverageSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = MenuFilter
@@ -119,8 +121,9 @@ class MenuView(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         establishment_id = self.kwargs.get("pk")
         establishment = get_object_or_404(Establishment, id=establishment_id)
-        return Beverage.objects.filter(establishment=establishment, availability_status=True).select_related("category",
-                                                                                                             "establishment")
+        return Beverage.objects.filter(
+            establishment=establishment, availability_status=True
+        ).select_related("category", "establishment")
 
     def list(self, request, *args, **kwargs):
         if not self.get_queryset().exists():

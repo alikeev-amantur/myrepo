@@ -12,19 +12,17 @@ def generate_reset_code():
 
 def datetime_serializer(obj):
     datetime_str = str(obj)
-    return json.dumps({'date': datetime_str})
+    return json.dumps({"date": datetime_str})
 
 
 def datetime_deserializer(obj):
     loaded_json = json.loads(obj)
-    return datetime.datetime.strptime(
-        loaded_json['date'], '%Y-%m-%d %H:%M:%S.%f'
-    )
+    return datetime.datetime.strptime(loaded_json["date"], "%Y-%m-%d %H:%M:%S.%f")
 
 
 def send_reset_code_email(email, code):
-    subject = 'Password Reset Code'
-    body = f'Your reset code: {code}'
+    subject = "Password Reset Code"
+    body = f"Your reset code: {code}"
     from_email = EMAIL_HOST_USER
     recipient_list = [email]
     send_mail(subject, body, from_email, recipient_list, fail_silently=False)

@@ -8,19 +8,14 @@ from apps.order.serializers import OrderSerializer, OrderHistorySerializer
 from apps.partner.models import Establishment
 
 
-@extend_schema(tags=["Orders"],
-               responses={
-                   201: OrderSerializer,
-                   400: OrderSerializer
-               }
-               )
+@extend_schema(tags=["Orders"], responses={201: OrderSerializer, 400: OrderSerializer})
 class PlaceOrderView(generics.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        beverage_id = serializer.validated_data.get('beverage').id
+        beverage_id = serializer.validated_data.get("beverage").id
         beverage = Beverage.objects.get(id=beverage_id)
         serializer.save(client=self.request.user, establishment=beverage.establishment)
 

@@ -47,7 +47,6 @@ class User(AbstractUser):
         default=1, help_text="Maximum number of establishments this user can own"
     )
 
-
     objects = UserManager()
 
     username = None

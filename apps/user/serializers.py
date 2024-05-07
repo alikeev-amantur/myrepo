@@ -34,7 +34,7 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         try:
-            user = User.objects.get(email=attrs.get('email'))
+            user = User.objects.get(email=attrs.get("email"))
             if not user.is_blocked or user.is_superuser:
                 data = super().validate(attrs)
                 refresh = self.get_token(self.user)
@@ -59,8 +59,8 @@ class AdminLoginSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         try:
-            user = User.objects.get(email=attrs.get('email'))
-            if user.role == 'admin' or user.is_superuser:
+            user = User.objects.get(email=attrs.get("email"))
+            if user.role == "admin" or user.is_superuser:
                 data = super().validate(attrs)
                 refresh = self.get_token(self.user)
                 data["refresh"] = str(refresh)
@@ -92,11 +92,9 @@ class BlockUserSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=attrs.get("email")).exists():
             user = User.objects.get(email=attrs.get("email"))
             if user.is_blocked == attrs.get("is_blocked"):
-                raise serializers.ValidationError(
-                    "You didn't change block state"
-                )
+                raise serializers.ValidationError("You didn't change block state")
             return attrs
-        raise serializers.ValidationError('User does not exists')
+        raise serializers.ValidationError("User does not exists")
 
 
 @client_registration_schema
@@ -110,8 +108,9 @@ class ClientRegisterSerializer(serializers.ModelSerializer):
     )
     password_confirm = serializers.CharField(write_only=True, required=True)
     email = serializers.EmailField(
-        required=True, max_length=255,
-        validators=[UniqueValidator(queryset=User.objects.all())]
+        required=True,
+        max_length=255,
+        validators=[UniqueValidator(queryset=User.objects.all())],
     )
 
     class Meta:
@@ -156,14 +155,12 @@ class ClientPasswordForgotPageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = (
-            'email',
-        )
+        fields = ("email",)
 
     def validate(self, attrs):
         if User.objects.filter(email=attrs.get("email")).exists():
             return attrs
-        raise serializers.ValidationError('User does not exist')
+        raise serializers.ValidationError("User does not exist")
 
 
 @user_password_reset_schema
@@ -173,16 +170,17 @@ class ClientPasswordResetSerializer(serializers.Serializer):
 
     class Meta:
         fields = (
-            'email',
-            'reset_code',
+            "email",
+            "reset_code",
         )
 
     def validate(self, attrs):
         try:
-            User.objects.filter(email=attrs.get('email'))
+            User.objects.filter(email=attrs.get("email"))
         except User.DoesNotExist as user_not_exist:
-            raise serializers.ValidationError('User does not exists') \
-                from user_not_exist
+            raise serializers.ValidationError(
+                "User does not exists"
+            ) from user_not_exist
         return attrs
 
 
@@ -196,8 +194,8 @@ class ClientPasswordChangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'password',
-            'password_confirm',
+            "password",
+            "password_confirm",
         )
 
     def validate(self, attrs):
@@ -206,10 +204,10 @@ class ClientPasswordChangeSerializer(serializers.ModelSerializer):
         :param attrs:
         :return:
         """
-        password = attrs.get('password')
-        password_confirm = attrs.get('password_confirm')
+        password = attrs.get("password")
+        password_confirm = attrs.get("password_confirm")
         if password != password_confirm:
-            raise serializers.ValidationError('Passwords do not match')
+            raise serializers.ValidationError("Passwords do not match")
         return attrs
 
 
@@ -237,6 +235,7 @@ class ClientListSerializer(serializers.ModelSerializer):
     """
     Only for client list
     """
+
     class Meta:
         model = User
         fields = (
@@ -277,8 +276,9 @@ class PartnerCreateSerializer(serializers.ModelSerializer):
     )
     password_confirm = serializers.CharField(write_only=True, required=True)
     email = serializers.EmailField(
-        required=True, max_length=255,
-        validators=[UniqueValidator(queryset=User.objects.all())]
+        required=True,
+        max_length=255,
+        validators=[UniqueValidator(queryset=User.objects.all())],
     )
 
     class Meta:

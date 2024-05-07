@@ -20,8 +20,7 @@ class Beverage(models.Model):
     description = models.TextField()
     availability_status = models.BooleanField(default=True)
     category = models.ForeignKey(
-        Category, on_delete=models.CASCADE,
-        related_name="beverages"
+        Category, on_delete=models.CASCADE, related_name="beverages"
     )
 
     establishment = models.ForeignKey(

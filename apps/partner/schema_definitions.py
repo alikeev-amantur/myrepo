@@ -18,10 +18,10 @@ establishment_serializer_schema = extend_schema_serializer(
                 "owner": "owner@example.com",
                 "qr_code": {
                     "id": 101,
-                    "qr_code_image": "http://example.com/media/qrcodes/joesbar_qr.jpg"
-                }
+                    "qr_code_image": "http://example.com/media/qrcodes/joesbar_qr.jpg",
+                },
             },
-            response_only=True
+            response_only=True,
         ),
         OpenApiExample(
             name="Establishment Creation Success",
@@ -39,10 +39,10 @@ establishment_serializer_schema = extend_schema_serializer(
                 "owner": "owner@example.com",
                 "qr_code": {
                     "id": 102,
-                    "qr_code_image": "http://example.com/media/qrcodes/newplace_qr.jpg"
-                }
+                    "qr_code_image": "http://example.com/media/qrcodes/newplace_qr.jpg",
+                },
             },
-            request_only=True
+            request_only=True,
         ),
         OpenApiExample(
             name="Establishment Update Success",
@@ -60,19 +60,17 @@ establishment_serializer_schema = extend_schema_serializer(
                 "owner": "owner@example.com",
                 "qr_code": {
                     "id": 101,
-                    "qr_code_image": "http://example.com/media/qrcodes/joesbar_updated_qr.jpg"
-                }
+                    "qr_code_image": "http://example.com/media/qrcodes/joesbar_updated_qr.jpg",
+                },
             },
-            request_only=True
+            request_only=True,
         ),
         OpenApiExample(
             name="Establishment Update Error",
             description="Error during the update of an establishment due to unauthorized access",
-            value={
-                "owner": ["You are not allowed to set the owner to another user."]
-            },
-            response_only=True
-        )
+            value={"owner": ["You are not allowed to set the owner to another user."]},
+            response_only=True,
+        ),
     ]
 )
 menu_serializer_schema = extend_schema_serializer(
@@ -98,7 +96,7 @@ menu_serializer_schema = extend_schema_serializer(
                         "description": "Refreshing carbonated soft drink.",
                         "availability_status": True,
                         "category_name": "Soft Drinks",
-                        "establishment_name": "Joe's Bar"
+                        "establishment_name": "Joe's Bar",
                     },
                     {
                         "id": 2,
@@ -107,9 +105,11 @@ menu_serializer_schema = extend_schema_serializer(
                         "description": "Freshly squeezed lemonade.",
                         "availability_status": True,
                         "category_name": "Non-alcoholic",
-                        "establishment_name": "Joe's Bar"
-                    }
-                ]
+                        "establishment_name": "Joe's Bar",
+                    },
+                ],
             },
-            response_only=True
-        )])
+            response_only=True,
+        )
+    ]
+)

@@ -1,18 +1,17 @@
 from django.utils import timezone
 
-
 from apps.beverage.models import Beverage
 
 from django_filters import rest_framework as filters
 
 
 class BeverageFilter(filters.FilterSet):
-    availability_status = filters.BooleanFilter(field_name='availability_status')
-    in_happy_hour = filters.BooleanFilter(method='filter_happy_hour')
+    availability_status = filters.BooleanFilter(field_name="availability_status")
+    in_happy_hour = filters.BooleanFilter(method="filter_happy_hour")
 
     class Meta:
         model = Beverage
-        fields = ['availability_status']
+        fields = ["availability_status"]
 
     def filter_happy_hour(self, queryset, name, value):
         """
@@ -23,6 +22,6 @@ class BeverageFilter(filters.FilterSet):
             current_time = timezone.localtime().time()
             queryset = queryset.filter(
                 establishment__happyhours_start__lte=current_time,
-                establishment__happyhours_end__gte=current_time
+                establishment__happyhours_end__gte=current_time,
             )
         return queryset

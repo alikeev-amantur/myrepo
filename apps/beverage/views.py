@@ -44,12 +44,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
-@extend_schema(tags=["Beverages"],
-               responses=({
-                   200: BeverageSerializer,
-                   201: BeverageSerializer,
-                   400: BeverageSerializer
-               }))
+@extend_schema(
+    tags=["Beverages"],
+    responses=(
+        {200: BeverageSerializer, 201: BeverageSerializer, 400: BeverageSerializer}
+    ),
+)
 class BeverageViewSet(viewsets.ModelViewSet):
     """
     Beverage ViewSet that handles creating, retrieving, updating, and deleting beverage items.
@@ -62,7 +62,7 @@ class BeverageViewSet(viewsets.ModelViewSet):
     serializer_class = BeverageSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = BeverageFilter
-    search_fields = ['name', 'category__name', 'establishment__name']
+    search_fields = ["name", "category__name", "establishment__name"]
 
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:

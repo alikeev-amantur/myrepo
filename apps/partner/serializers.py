@@ -12,6 +12,7 @@ class EstablishmentSerializer(serializers.ModelSerializer):
     """
     Main serializer for Establishment model
     """
+
     location = GeometryField()
 
     class Meta:
@@ -73,11 +74,15 @@ class EstablishmentCreateUpdateSerializer(serializers.ModelSerializer):
 
             # Validate latitude
             if not -90 <= latitude <= 90:
-                raise serializers.ValidationError("Latitude must be between -90 and 90.")
+                raise serializers.ValidationError(
+                    "Latitude must be between -90 and 90."
+                )
 
             # Validate longitude
             if not -180 <= longitude <= 180:
-                raise serializers.ValidationError("Longitude must be between -180 and 180.")
+                raise serializers.ValidationError(
+                    "Longitude must be between -180 and 180."
+                )
 
         return value
 
@@ -85,17 +90,19 @@ class EstablishmentCreateUpdateSerializer(serializers.ModelSerializer):
         """
         Validate that the owner is the authenticated user.
         """
-        user = self.context['request'].user
+        user = self.context["request"].user
         if value != user:
-            raise serializers.ValidationError("You are not allowed to set the owner to another user.")
+            raise serializers.ValidationError(
+                "You are not allowed to set the owner to another user."
+            )
         return value
 
     def create(self, validated_data):
         """
         Create and return a new `Establishment` instance.
         """
-        user = self.context['request'].user
-        validated_data['owner'] = user
+        user = self.context["request"].user
+        validated_data["owner"] = user
         phone_number_validation(validated_data)
         establishment = Establishment.objects.create(**validated_data)
         return establishment
