@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     # dependencies
     "corsheaders",
+    'channels',
     'django_filters',
     "rest_framework",
     "drf_spectacular",
@@ -142,24 +143,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
+ASGI_APPLICATION = 'happyhours.asgi.application'
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Happy Hours',
     'DESCRIPTION': 'Happy Hours API',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-    'SERVERS': [{'url': 'http://16.170.203.161', 'description': 'Production server'},],
+    'SERVERS': [{'url': 'http://16.170.203.161', 'description': 'Production server'}, ],
     "PARSER_WHITELIST": ["rest_framework.parsers.JSONParser"],
-    # 'SECURITY': [{'jwtAuth': []}],
-    # 'COMPONENTS': {
-    #         'securitySchemes': {
-    #             'jwtAuth': {
-    #                 'type': 'http',
-    #                 'scheme': 'bearer',
-    #                 'bearerFormat': 'JWT'
-    #             },
-    #         },
-    #     },
 }
 
 SIMPLE_JWT = {
@@ -211,3 +203,11 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOW_ALL_ORIGINS = True
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}

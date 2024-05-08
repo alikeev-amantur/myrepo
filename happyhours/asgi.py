@@ -9,8 +9,19 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
 
 import os
 
+from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
+from django_channels_jwt.middleware import JwtAuthMiddlewareStack
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "happyhours.settings")
+from apps.order import routing
 
-application = get_asgi_application()
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "happyhours.settings.local")
+
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": JwtAuthMiddlewareStack(
+        URLRouter(
+            routing.websocket_urlpatterns
+        )
+    ),
+})

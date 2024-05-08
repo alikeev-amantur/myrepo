@@ -1,6 +1,8 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.utils import timezone
+
 from .models import Establishment, Order
 
 
@@ -10,7 +12,8 @@ class OrderConsumer(AsyncWebsocketConsumer):
         self.room_group_name = f'order_updates_{self.establishment_id}'
         self.user = self.scope["user"]
 
-        if await self.is_establishment_owner(self.establishment_id, self.user):
+        if await self.is_establishment_owner(self.establishment_id, self.user) and await self.is_happy_hour(
+                self.establishment_id):
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name
@@ -49,6 +52,12 @@ class OrderConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def is_establishment_owner(self, establishment_id, user):
         return Establishment.objects.filter(id=establishment_id, owner=user).exists()
+
+    @database_sync_to_async
+    def is_happy_hour(self, establishment_id):
+        establishment = Establishment.objects.get(id=establishment_id)
+        current_time = timezone.localtime().time()
+        return establishment.happyhours_start <= current_time <= establishment.happyhours_end
 
     @database_sync_to_async
     def update_order_status(self, order_id, status):

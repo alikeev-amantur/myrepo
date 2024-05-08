@@ -1,3 +1,5 @@
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.utils import timezone
 from rest_framework import serializers
 from .models import Order
@@ -10,7 +12,7 @@ from .schema_definitions import order_serializer_schema, order_history_serialize
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ["id", "establishment", "beverage", "client", "order_date"]
+        fields = ["id", "establishment", "beverage", "status", "client", "order_date"]
         read_only_fields = ["client", "establishment"]
 
     def get_default_establishment(self, beverage):
@@ -61,6 +63,25 @@ class OrderSerializer(serializers.ModelSerializer):
         self.validate_order_per_hour(client)
 
         return data
+
+    def save(self, **kwargs):
+        order = super().save(**kwargs)
+        channel_layer = get_channel_layer()
+        group_name = f'order_updates_{order.establishment.id}'
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'new_order',
+                'message': {
+                    'order_id': order.id,
+                    'status': order.status,
+                    'beverage': order.beverage,
+                    'client': order.client,
+                    'order_date': order.order_date
+                }
+            }
+        )
+        return order
 
 
 @order_history_serializer_schema
