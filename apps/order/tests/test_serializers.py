@@ -3,7 +3,6 @@ from unittest.mock import patch, Mock
 from django.utils import timezone
 import datetime
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import Serializer
 from happyhours.factories import UserFactory, BeverageFactory, EstablishmentFactory
 from ..serializers import OrderSerializer
 
@@ -56,7 +55,6 @@ def test_validate_order_happyhours_inside(mock_time, establishment, user, bevera
     establishment.happyhours_start = datetime.time(10, 0)
     establishment.happyhours_end = datetime.time(12, 0)
     serializer = OrderSerializer()
-    # No exception means validation passed
     serializer.validate_order_happyhours(establishment)
 
 

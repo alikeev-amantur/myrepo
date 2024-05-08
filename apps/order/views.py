@@ -37,3 +37,4 @@ class PartnerOrderHistoryView(generics.ListAPIView):
     def get_queryset(self):
         owned_establishments = Establishment.objects.filter(owner=self.request.user)
         return Order.objects.filter(establishment__in=owned_establishments)
+
