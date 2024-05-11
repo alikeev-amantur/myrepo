@@ -1,16 +1,16 @@
 from django.contrib.gis.geos import Point
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+
+# from rest_framework.exceptions import ValidationError
 from rest_framework_gis.fields import GeometryField
 
-from .models import Establishment
-from .utils import phone_number_validation
+from apps.partner.models import Establishment
+from apps.partner.utils import phone_number_validation
 
 
-# @establishment_serializer_schema
-class EstablishmentSerializer(serializers.ModelSerializer):
+class BaseEstablishmentSerializer(serializers.ModelSerializer):
     """
-    Main serializer for Establishment model
+    Base serializer for common fields and methods in Establishment serializers.
     """
 
     location = GeometryField()
@@ -24,6 +24,7 @@ class EstablishmentSerializer(serializers.ModelSerializer):
             "description",
             "phone_number",
             "logo",
+            "email",
             "address",
             "happyhours_start",
             "happyhours_end",
@@ -32,35 +33,26 @@ class EstablishmentSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         request = self.context.get("request")
-        if obj.logo != "":
+        if obj.logo and obj.logo.url:
             return request.build_absolute_uri(obj.logo.url)
         return ""
+
+
+class EstablishmentSerializer(BaseEstablishmentSerializer):
+    """
+    Serializer for viewing Establishment instances.
+    """
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation["logo"] = self.get_image_url(instance)
-        representation["owner"] = instance.owner.email
         return representation
 
 
-# @establishment_serializer_schema
-class EstablishmentCreateUpdateSerializer(serializers.ModelSerializer):
-    location = GeometryField()
-
-    class Meta:
-        model = Establishment
-        fields = (
-            "id",
-            "name",
-            "location",
-            "description",
-            "phone_number",
-            "logo",
-            "address",
-            "happyhours_start",
-            "happyhours_end",
-            "owner",
-        )
+class EstablishmentCreateUpdateSerializer(BaseEstablishmentSerializer):
+    """
+    Serializer for creating and updating Establishment instances.
+    """
 
     def validate_location(self, value):
         """Validate that location contains valid latitude and longitude."""
@@ -88,7 +80,7 @@ class EstablishmentCreateUpdateSerializer(serializers.ModelSerializer):
 
     def validate_owner(self, value):
         """
-        Validate that the owner is the authenticated user.
+        Validate that the owner is the user who's performing the creation.
         """
         user = self.context["request"].user
         if value != user:
@@ -106,17 +98,3 @@ class EstablishmentCreateUpdateSerializer(serializers.ModelSerializer):
         phone_number_validation(validated_data)
         establishment = Establishment.objects.create(**validated_data)
         return establishment
-
-    def update(self, instance, validated_data):
-        """
-        Update existing Establishment instance.
-        :param instance:
-        :param validated_data:
-        :return:
-        """
-        phone_number_validation(validated_data)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        instance.save()
-        return instance

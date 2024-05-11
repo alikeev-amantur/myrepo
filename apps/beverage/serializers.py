@@ -1,8 +1,6 @@
-from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from .models import Beverage, Category
 from .schema_definitions import beverage_serializer_schema
-from ..partner.models import Establishment
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -17,7 +15,6 @@ class CategorySerializer(serializers.ModelSerializer):
 
 @beverage_serializer_schema
 class BeverageSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Beverage
         fields = [

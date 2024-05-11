@@ -1,5 +1,3 @@
-from datetime import time
-
 import pytest
 import pytz
 from django.db.models.functions import datetime
@@ -43,13 +41,11 @@ def beverage(partner_establishment):
 
 @pytest.fixture
 def establishment_happy_hour():
-    # Ensure these times align with your freeze_time settings
     return EstablishmentFactory(happyhours_start="15:00:00", happyhours_end="17:00:00")
 
 
 @pytest.fixture
 def establishment_not_happy_hour():
-    # Ensure these times are outside your freeze_time settings
     return EstablishmentFactory(happyhours_start="18:00:00", happyhours_end="20:00:00")
 
 
@@ -92,8 +88,6 @@ def test_create_beverage_as_partner(client, partner_user, partner_establishment)
         "category": CategoryFactory().id,
     }
     response = client.post(url, data)
-    if response.status_code != status.HTTP_201_CREATED:
-        print(response.data)  # Print response data for debugging
     assert response.status_code == status.HTTP_201_CREATED
 
 

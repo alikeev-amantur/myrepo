@@ -54,6 +54,7 @@ class EstablishmentFactory(factory.django.DjangoModelFactory):
     owner = factory.SubFactory(UserFactory)
 
 
+
 class BeverageFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Beverage

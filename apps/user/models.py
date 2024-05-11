@@ -46,6 +46,7 @@ class User(AbstractUser):
     max_establishments = models.PositiveIntegerField(
         default=1, help_text="Maximum number of establishments this user can own"
     )
+    phone_number = models.CharField(max_length=255, blank=True, null=True)
 
     objects = UserManager()
 

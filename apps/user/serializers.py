@@ -7,6 +7,7 @@ from apps.user.schema_definitions import (
     client_registration_schema,
     partner_creation_schema,
     user_profile_schema,
+    user_profile_admin_schema,
     client_partner_login,
     admin_login_schema,
     admin_block_user_schema,
@@ -143,7 +144,9 @@ class ClientRegisterSerializer(serializers.ModelSerializer):
         :param validated_data:
         :return:
         """
-        user = User.objects.create_user(role="client", **validated_data)
+        user = User.objects.create_user(
+            role="client", max_establishments=0, **validated_data
+        )
         user.set_password(validated_data["password"])
         user.save()
         return user
@@ -230,6 +233,49 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
+@user_profile_schema
+class PartnerProfileSerializer(serializers.ModelSerializer):
+    """
+    Only for partner profile
+    """
+
+    email = serializers.EmailField(read_only=True)
+    max_establishments = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "name",
+            "phone_number",
+            "max_establishments",
+        )
+
+
+@user_profile_admin_schema
+class UserSerializerAdmin(serializers.ModelSerializer):
+    """
+    Serializer for user profile admin
+    """
+
+    email = serializers.EmailField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "name",
+            "role",
+            "date_of_birth",
+            "avatar",
+            "phone_number",
+            "max_establishments",
+            "is_blocked",
+        )
+
+
 @client_list_schema
 class ClientListSerializer(serializers.ModelSerializer):
     """
@@ -260,6 +306,7 @@ class PartnerListSerializer(serializers.ModelSerializer):
             "id",
             "email",
             "name",
+            "phone_number",
             "max_establishments",
             "is_blocked",
         )

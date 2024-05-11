@@ -9,7 +9,7 @@ from rest_framework.generics import (
     RetrieveAPIView,
     UpdateAPIView,
     DestroyAPIView,
-    get_object_or_404,
+    get_object_or_404, ListCreateAPIView,
 )
 
 from rest_framework.permissions import IsAuthenticated
@@ -31,19 +31,24 @@ from ..beverage.serializers import BeverageSerializer
 
 
 @extend_schema(tags=["Establishments"])
-class EstablishmentListView(ListAPIView):
+class EstablishmentListCreateView(ListCreateAPIView):
     """
-    Lists establishments based on user roles. This view is accessible to all
-    authenticated users. Partners see only
-    establishments they own.
+    Get a list of establishments or create a new establishment.
+    - List is accessible to all authenticated users. Partners see only the establishments they own.
+    - Creation is restricted to partner users who can create up to their allowed limit.
+
     ### Implementation Details:
     - The queryset dynamically adjusts based on the authenticated user's role,
-    ensuring that users receive data
-      that is relevant and appropriate to their permissions.
+    ensuring that users receive data that is relevant and appropriate to their permissions.
+    - Ensures that the partner has not exceeded their limit of owned establishments.
+    - Checks data integrity for phone numbers and locations during creation.
     """
 
-    serializer_class = EstablishmentSerializer
-    permission_classes = [IsAuthenticated]
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return EstablishmentCreateUpdateSerializer
+        return EstablishmentSerializer
+
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = EstablishmentFilter
     search_fields = ["name", "beverages__name"]
@@ -54,22 +59,10 @@ class EstablishmentListView(ListAPIView):
             return Establishment.objects.filter(owner=user)
         return Establishment.objects.all()
 
-
-@extend_schema(tags=["Establishments"])
-class EstablishmentCreateView(CreateAPIView):
-    """
-    Creates a new establishment, restricted to partner users who can
-     create up to their allowed limit.
-
-    ### Validation:
-    - Ensures that the partner has not exceeded their limit of owned establishments.
-    - Checks data integrity for phone numbers and locations.
-    """
-
-    queryset = Establishment.objects.all()
-    serializer_class = EstablishmentCreateUpdateSerializer
-
-    permission_classes = [IsPartnerUser]
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsPartnerUser()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -77,7 +70,7 @@ class EstablishmentCreateView(CreateAPIView):
             raise PermissionDenied(
                 "This partner has reached their maximum number of establishments."
             )
-        serializer.save()
+        serializer.save(owner=user)
 
 
 @extend_schema(tags=["Establishments"])
@@ -117,10 +110,18 @@ class MenuView(viewsets.ReadOnlyModelViewSet):
     serializer_class = BeverageSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = MenuFilter
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         establishment_id = self.kwargs.get("pk")
         establishment = get_object_or_404(Establishment, id=establishment_id)
+        user = self.request.user
+
+        if user == establishment.owner:
+            return Beverage.objects.filter(establishment=establishment).select_related(
+                "category", "establishment"
+            )
+
         return Beverage.objects.filter(
             establishment=establishment, availability_status=True
         ).select_related("category", "establishment")

@@ -1,25 +1,19 @@
 from django.urls import path
 
 from .views import (
-    EstablishmentListView,
-    EstablishmentCreateView,
+    EstablishmentListCreateView,
     EstablishmentViewSet,
     MenuView,
 )
 
 urlpatterns = [
     path(
-        "establishment/list/",
-        EstablishmentListView.as_view(),
-        name="establishment-list",
+        "establishments/",
+        EstablishmentListCreateView.as_view(),
+        name="establishments",
     ),
     path(
-        "establishment/create/",
-        EstablishmentCreateView.as_view(),
-        name="establishment-create",
-    ),
-    path(
-        "establishment/<int:pk>/",
+        "establishments/<int:pk>/",
         EstablishmentViewSet.as_view(
             {
                 "get": "retrieve",
@@ -30,5 +24,5 @@ urlpatterns = [
         ),
         name="establishment-detail",
     ),
-    path("menu/<int:pk>/", MenuView.as_view({"get": "list"}), name="menu-detail"),
+    path("menu/<int:pk>/", MenuView.as_view({"get": "list"}), name="menu-list"),
 ]

@@ -1,5 +1,3 @@
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from django.utils import timezone
 from rest_framework import serializers
 from .models import Order
@@ -12,10 +10,11 @@ from .schema_definitions import order_serializer_schema, order_history_serialize
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ["id", "establishment", "beverage", "status", "client", "order_date"]
+        fields = ["id", "establishment", "beverage", "client", "order_date", "status"]
         read_only_fields = ["client", "establishment"]
 
     def get_default_establishment(self, beverage):
+        # Get the establishment associated with the beverage
         return beverage.establishment
 
     def validate_order_happyhours(self, establishment):
@@ -30,12 +29,15 @@ class OrderSerializer(serializers.ModelSerializer):
             )
 
     def validate_order_per_hour(self, client):
+        # Get the current time and calculate one hour ago
         one_hour_ago = timezone.localtime() - datetime.timedelta(hours=1)
 
+        # Check if there are any existing orders from this client in the last hour
         if Order.objects.filter(client=client, order_date__gte=one_hour_ago).exists():
             raise serializers.ValidationError("You can only place one order per hour.")
 
     def validate_order_per_day(self, client, establishment):
+        # Ensure one order per day per establishment
         current_time = timezone.localtime()
         today_min = datetime.datetime.combine(current_time.date(), datetime.time.min)
         today_max = datetime.datetime.combine(current_time.date(), datetime.time.max)
@@ -52,6 +54,7 @@ class OrderSerializer(serializers.ModelSerializer):
             )
 
     def validate(self, data):
+        # Automate providing client and establishment
         data["client"] = self.context["request"].user
         data["establishment"] = self.get_default_establishment(data["beverage"])
 
@@ -64,25 +67,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
         return data
 
-    def save(self, **kwargs):
-        order = super().save(**kwargs)
-        channel_layer = get_channel_layer()
-        group_name = f'order_updates_{order.establishment.id}'
-        async_to_sync(channel_layer.group_send)(
-            group_name,
-            {
-                'type': 'new_order',
-                'message': {
-                    'order_id': order.id,
-                    'status': order.status,
-                    'beverage': order.beverage,
-                    'client': order.client,
-                    'order_date': order.order_date
-                }
-            }
-        )
-        return order
-
 
 @order_history_serializer_schema
 class OrderHistorySerializer(serializers.ModelSerializer):
@@ -91,12 +75,6 @@ class OrderHistorySerializer(serializers.ModelSerializer):
     )
     beverage_name = serializers.CharField(source="beverage.name", read_only=True)
 
-    client_details = serializers.HyperlinkedRelatedField(
-        view_name='v1:user-detail',
-        read_only=True,
-        source='client'
-    )
-
     class Meta:
         model = Order
-        fields = ["id", "order_date", "establishment_name", "beverage_name", "client_details"]
+        fields = ["id", "order_date", "establishment_name", "beverage_name", "client", "status"]

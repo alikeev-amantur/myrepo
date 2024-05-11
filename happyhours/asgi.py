@@ -1,27 +1,19 @@
-"""
-ASGI config for happyhours project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
-"""
-
 import os
-
-from channels.routing import ProtocolTypeRouter, URLRouter
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'happyhours.settings.local')
+django.setup()
 from django.core.asgi import get_asgi_application
-from django_channels_jwt.middleware import JwtAuthMiddlewareStack
-
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
 from apps.order import routing
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "happyhours.settings.local")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'happyhours.settings.local')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": JwtAuthMiddlewareStack(
+    "websocket": AuthMiddlewareStack(
         URLRouter(
-            routing.websocket_urlpatterns
+             routing.websocket_urlpatterns
         )
     ),
 })

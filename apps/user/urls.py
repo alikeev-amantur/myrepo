@@ -17,6 +17,7 @@ from .views import (
     AdminLoginView,
     PartnerListView,
     BlockUserView,
+    UserViewSetAdmin,
 )
 
 TokenBlacklistView = extend_schema(tags=["Users"])(TokenBlacklistView)
@@ -38,11 +39,21 @@ urlpatterns = [
             {
                 "get": "retrieve",
                 "put": "update",
-                "patch": "partial_update",
                 "delete": "destroy",
             }
         ),
-        name="user-detail",
+        name="user-profile",
+    ),
+    path(
+        "profiles_admin/<int:pk>/",
+        UserViewSetAdmin.as_view(
+            {
+                "get": "retrieve",
+                "put": "update",
+                "delete": "destroy",
+            }
+        ),
+        name="user-profile-admin",
     ),
     path(
         "password_forgot/",

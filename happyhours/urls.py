@@ -29,6 +29,7 @@ v1_api = (
         path('order/', include('apps.order.urls')),
         path('partner/', include('apps.partner.urls')),
         path('user/', include('apps.user.urls')),
+        path('feedback/', include('apps.feedback.urls')),
     ], 'v1',
 )
 

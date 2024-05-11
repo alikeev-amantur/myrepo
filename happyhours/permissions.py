@@ -3,7 +3,15 @@ from rest_framework import permissions
 
 class IsUserOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return bool(obj == request.user or request.user.is_superuser)
+        return bool(
+            obj == request.user or request.user.is_superuser or
+            not request.user.is_anonymous
+        )
+
+
+class IsUserObjectOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return bool(obj.user == request.user or request.user.is_superuser)
 
 
 class IsPartnerUser(permissions.BasePermission):

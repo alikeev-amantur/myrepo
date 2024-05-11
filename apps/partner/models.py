@@ -15,6 +15,7 @@ class Establishment(models.Model):
     description = models.TextField(blank=True, null=True)
     phone_number = models.CharField(max_length=255, blank=True, null=True)
     address = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
     logo = models.ImageField(
         blank=True,
         null=True,

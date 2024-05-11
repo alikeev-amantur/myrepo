@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     # dependencies
     "corsheaders",
-    'channels',
     'django_filters',
     "rest_framework",
     "drf_spectacular",
@@ -51,6 +50,7 @@ INSTALLED_APPS = [
     "apps.beverage.apps.BeverageConfig",
     "apps.partner.apps.PartnerConfig",
     "apps.order.apps.OrderConfig",
+    "apps.feedback.apps.FeedbackConfig",
 ]
 
 MIDDLEWARE = [
@@ -143,19 +143,18 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
-ASGI_APPLICATION = 'happyhours.asgi.application'
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Happy Hours',
     'DESCRIPTION': 'Happy Hours API',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-    'SERVERS': [{'url': 'http://16.170.203.161', 'description': 'Production server'}, ],
+    'SERVERS': [{'url': 'http://16.170.203.161', 'description': 'Production server'},],
     "PARSER_WHITELIST": ["rest_framework.parsers.JSONParser"],
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -182,7 +181,7 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=15),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
@@ -203,11 +202,13 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOW_ALL_ORIGINS = True
+ASGI_APPLICATION = 'happyhours.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [('redis', 6379)],
         },
     },
 }
+

@@ -38,6 +38,8 @@ from .serializers import (
     ClientListSerializer,
     PartnerListSerializer,
     BlockUserSerializer,
+    PartnerProfileSerializer,
+    UserSerializerAdmin,
 )
 from .utils import (
     generate_reset_code,
@@ -159,12 +161,13 @@ class ClientPasswordChangeView(GenericAPIView):
 @extend_schema(tags=["Users"])
 class UserViewSet(ViewSetMixin, RetrieveAPIView, UpdateAPIView, DestroyAPIView):
     """
-    User's profile CRUD
+    User's profile CRUD. For client (mobile)
 
     ### Fields:
-    - 'name': Name of the user
-    - 'date_of_birth': Birth of the user
-    - `avatar`: Image of profile
+    - `name`: Name of the Client/Partner
+    - `date_of_birth`: Birth of the Client
+    - `avatar`: Image of Client profile
+    - `phone_number`: Phone number of Partner
 
     ### Access Control:
     - Only user himself can access this endpoint
@@ -175,13 +178,43 @@ class UserViewSet(ViewSetMixin, RetrieveAPIView, UpdateAPIView, DestroyAPIView):
     """
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
     permission_classes = [IsUserOwner]
 
     def get_object(self):
         obj = get_object_or_404(self.queryset, id=self.request.user.id)
         self.check_object_permissions(self.request, obj)
         return obj
+
+    def get_serializer_class(self):
+        if not self.request.user.is_anonymous:
+            if self.request.user.role == "partner":
+                return PartnerProfileSerializer
+        return UserSerializer
+
+
+@extend_schema(tags=["Users"])
+class UserViewSetAdmin(ViewSetMixin, RetrieveAPIView, UpdateAPIView, DestroyAPIView):
+    """
+    User's profile CRUD for admin
+
+    ### Fields:
+    - `name`: Name of the User
+    - `email`: Email of the User
+    - `role`: Role of the User
+    - `date_of_birth`: Birth of the User
+    - `avatar`: Image of profile
+    - `phone_number`: Phone number of the User
+    - `max_establishments`: Max establishments of the User
+    - `is_blocked`: Blocked status of the User
+
+    ### Access Control:
+    - Admin, Superuser
+
+    """
+
+    queryset = User.objects.all()
+    permission_classes = [IsAdmin]
+    serializer_class = UserSerializerAdmin
 
 
 @extend_schema(tags=["Users"])
